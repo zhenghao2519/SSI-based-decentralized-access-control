@@ -5,14 +5,14 @@ ENV ENABLE_PYDEVD_PYCHARM 0
 ENV PYDEVD_PYCHARM_HOST "host.docker.internal"
 
 # Download jq
-RUN mkdir bin && curl -L -o bin/jq \
-	https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
-	chmod ug+x bin/jq
+# RUN mkdir bin && curl -L -o bin/jq \
+# 	https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
+# 	chmod ug+x bin/jq
 
 
 
 # ADD aries_cloudagent ./aries_cloudagent
-ADD bin ./bin
+#ADD bin ./bin
 ADD README.md ./
 # ADD scripts ./scripts
 # ADD setup.py ./
