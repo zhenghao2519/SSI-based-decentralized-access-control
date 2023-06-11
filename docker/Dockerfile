@@ -4,24 +4,18 @@ ENV ENABLE_PTVSD 0
 ENV ENABLE_PYDEVD_PYCHARM 0
 ENV PYDEVD_PYCHARM_HOST "host.docker.internal"
 
+# Download jq
 RUN mkdir bin && curl -L -o bin/jq \
 	https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 && \
 	chmod ug+x bin/jq
 
-# Add and install Indy Agent code
-ADD requirements*.txt ./
 
-RUN pip3 install --no-cache-dir \
-	-r requirements.txt \
-	-r requirements.askar.txt \
-	-r requirements.bbs.txt \
-	-r requirements.dev.txt
 
-ADD aries_cloudagent ./aries_cloudagent
+# ADD aries_cloudagent ./aries_cloudagent
 ADD bin ./bin
 ADD README.md ./
-ADD scripts ./scripts
-ADD setup.py ./
+# ADD scripts ./scripts
+# ADD setup.py ./
 
 # USER root
 # RUN export DEBIAN_FRONTEND=noninteractive
@@ -30,18 +24,22 @@ ADD setup.py ./
 # USER 1000
 
 
-RUN pip3 install --no-cache-dir -e .\
+RUN pip3 install --no-cache-dir aries-cloudagent\
 	pip install --no-cache-dir OPA-python-client\
 	pip install --no-cache-dir requests\
 	pip install --no-cache-dir jsonsearch
 
-RUN mkdir demo logs && chown -R indy:indy demo logs && chmod -R ug+rw demo logs
+# RUN mkdir demo logs && chown -R indy:indy demo logs && chmod -R ug+rw demo logs
 
 # Add and install demo code
-ADD demo/requirements.txt ./demo/requirements.txt
-RUN pip3 install --no-cache-dir -r demo/requirements.txt
+# ADD demo/requirements.txt ./demo/requirements.txt
+# RUN pip3 install --no-cache-dir -r demo/requirements.txt
 
-ADD demo ./demo
+# ADD demo ./demo
 
+ADD agent_runners ./agent_runners
 
-ENTRYPOINT ["bash", "-c", "demo/ngrok-wait.sh \"$@\"", "--"]
+#ENTRYPOINT ["bash", "-c", "demo/ngrok-wait.sh \"$@\"", "--"]
+
+ENTRYPOINT ["bash", "-c", "agent_runners/ngrok-wait.sh \"$@\"", "--"]
+
