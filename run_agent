@@ -1,160 +1,188 @@
 #!/bin/bash
 
+# ignore the difference between uppercase and lowercase
 shopt -s nocasematch
 
+# enter the directory this shell files is located in
 cd $(dirname $0)
 
-AGENT="$1"
-shift
-if [ "${AGENT}" = "gui" ]; then
-  AGENT_MODULE="gui_server"
-  AGENT_PORT=$1
-  AGENT_NAME=$2
-  if [ "$AGENT_PORT" = "--help" ]; then
-    echo -e "Help:"
-  else
-    echo -e "Running the agent with name : ${AGENT_NAME} and port : ${AGENT_PORT}.\n"
-    shift
-    shift
-  fi
-fi
-ARGS=""
-
-TRACE_ENABLED=""
-TRACE_TAG=acapy.events
-if ! [ -z "$TRACE_TARGET_URL" ]; then
-  TRACE_TARGET=http://${TRACE_TARGET_URL}/
+# read the first argument as agent mode
+if ! [ -z "$1" ]; then
+  AGENT_MODE="$1"
 else
-  TRACE_TARGET=log
-fi
-
-WEBHOOK_TARGET=""
-if [ -z "$DOCKER_NET" ]; then
-  DOCKER_NET="bridge"
-fi
-DOCKER_VOL=""
-
-j=1
-for i in "$@"; do
-  ((j++))
-  if [ ! -z "$SKIP" ]; then
-    SKIP=""
-    continue
-  fi
-  case $i in
-  --events)
-    if [ "${AGENT}" = "performance" ]; then
-      echo -e "\nIgnoring the \"--events\" option when running the ${AGENT} agent.\n"
-    else
-      EVENTS=1
-    fi
-    continue
-    ;;
-  --self-attested)
-    SELF_ATTESTED=1
-    continue
-    ;;
-  --trace-log)
-    TRACE_ENABLED=1
-    TRACE_TARGET=log
-    TRACE_TAG=acapy.events
-    continue
-    ;;
-  --trace-http)
-    TRACE_ENABLED=1
-    TRACE_TARGET=http://${TRACE_TARGET_URL}/
-    TRACE_TAG=acapy.events
-    continue
-    ;;
-  --webhook-url)
-    WEBHOOK_TARGET=http://${WEBHOOK_URL}
-    continue
-    ;;
-  --debug-ptvsd)
-    ENABLE_PTVSD=1
-    continue
-    ;;
-  --debug-pycharm)
-    ENABLE_PYDEVD_PYCHARM=1
-    continue
-    ;;
-  --debug-pycharm-controller-port)
-    PYDEVD_PYCHARM_CONTROLLER_PORT=${!j}
-    SKIP=1
-    continue
-    ;;
-  --debug-pycharm-agent-port)
-    PYDEVD_PYCHARM_AGENT_PORT=${!j}
-    SKIP=1
-    continue
-    ;;
-  --timing)
-    if [ ! -d "../logs" ]; then
-      mkdir ../logs && chmod -R uga+rws ../logs
-    fi
-    if [ "$(ls -ld ../logs | grep dr..r..rwx)" == "" ]; then
-      echo "Error: To use the --timing parameter, the directory '../logs' must exist and all users must be able to write to it."
-      echo "For example, to create the directory and then set the permissions use: 'mkdir ../logs; chmod uga+rws ../logs'"
-      exit 1
-    fi
-
-    DOCKER_VOL="${DOCKER_VOL} -v C:/Users/42143/Desktop/BA-Arbeit/report/bachelor-thesis-zhenghao-zhang/Code/Aries/aries-cloudagent-python/demo/logs/:/home/indy/logs"
-    DOCKER_VOL="${DOCKER_VOL} -v /$(pwd)/../logs:/home/indy/logs"
-    DOCKER_VOL="${DOCKER_VOL} -v ../logs : /home/indy/logs"
-    continue
-    ;;
-  --bg)
-    if [ "${AGENT}" = "server" ] || [ "${AGENT}" = "gui" ]; then
-      DOCKER_OPTS="-d"
-      echo -e "\nRunning in ${AGENT} in the background. Note that you cannot use the command line console in this mode."
-      echo To see the logs use: \"docker logs ${AGENT}\".
-      echo While viewing logs, hit CTRL-C to return to the command line.
-      echo To stop the agent, use: \"docker stop ${AGENT}\". The docker environment will
-      echo -e "be removed on stop.\n\n"
-    else
-      echo The "bg" option \(for running docker in detached mode\) is only for agents
-      echo Ignoring...
-    fi
-    continue
-    ;;
-  --help)
-    cat <<EOF
-
-Usage:
-   ./demo_run <agent> <port> <name> [OPTIONS]
-
-   - <agent> is server or gui. The option "gui" starts a GUI along with the agent.
-             While the option "server" only starts the agent itself.
-   - <port> is the port that the agent uses. The agent will use 9 ports from the given port.
-   - <name> is the name of the agent.
-   - Options:
-      --events - display on the terminal the webhook events from the ACA-Py agent.
-      --timing - at the end of the run, display timing; relevant to the "performance" agent.
-      --bg - run the agent in the background; for use when using OpenAPI/Swagger interface
-          --trace-log - log trace events to the standard log file
-          --trace-http - log trace events to an http endpoint specified in env var TRACE_TARGET_URL
-          --self-attested - include a self-attested attribute in the proof request/response
-          --webhook-url - send events to an http endpoint specified in env var WEBHOOK_URL
-      debug options: --debug-pycharm-agent-port <port>; --debug-pycharm-controller-port <port>
-                    --debug-pycharm; --debug-ptvsd
-
-EOF
-    exit 0
-    ;;
-  esac
-  ARGS="${ARGS:+$ARGS }$i"
-done
-
-if [ "$AGENT" = "gui" ]; then
-  AGENT_MODULE="gui_server"
-  AGENT_PORT_RANGE=${AGENT_PORT}-$(expr ${AGENT_PORT} + 9)
-else
-  echo "Please specify which agent you want to run. Choose from 'server',  'gui'."
+  echo "Please enter all required arguments correctly!"
+  echo "For more details, run './run_agent --help' or './run_agent -h'."
   exit 1
 fi
 
+# display help
+if [ "$AGENT_MODE" = "--help" ] || [ "$AGENT_MODE" = "-h" ]; then
+  cat <<EOF
+
+Usage:
+   ./run_agent <mode> <port> <name> [OPTIONS]
+
+   - <mode> is 'server' or 'gui'. The option 'gui' starts a GUI along with the 
+            agent. While the option 'server' only starts the agent itself.
+   - <port> is the port that the agent uses. The agent reserves 9 ports after 
+            the given port. (e.g., 8000 => 8000-8009)
+   - <name> is the name of the agent.
+EOF
+#    - Options:
+#       --events - display on the terminal the webhook events from the ACA-Py agent.
+#       --timing - at the end of the run, display timing; relevant to the "performance" agent.
+#       --bg - run the agent in the background; for use when using OpenAPI/Swagger interface
+#           --trace-log - log trace events to the standard log file
+#           --trace-http - log trace events to an http endpoint specified in env var TRACE_TARGET_URL
+#           --self-attested - include a self-attested attribute in the proof request/response
+#           --webhook-url - send events to an http endpoint specified in env var WEBHOOK_URL
+#       debug options: --debug-pycharm-agent-port <port>; --debug-pycharm-controller-port <port>
+#                     --debug-pycharm; --debug-ptvsd
+# EOF
+
+  exit 0
+fi
+
+#check mode validity
+if ! [[ "$AGENT_MODE" = "gui" || "$AGENT_MODE" = "server" ]]; then
+  echo "Please specify which agent you want to run. Choose from 'server', 'gui'."
+  echo "For more details, run './run_agent --help' or './run_agent -h'."
+  exit 1
+fi
+
+# read the second and third argument as the chosen port and name
+if ! [[ -z "$2" || -z "$3" ]]; then
+  # both agent port and agent name are given
+  AGENT_PORT="$2"
+  AGENT_NAME="$3"
+else 
+  echo "please enter the agent port and agent name."
+  echo "For more details, run './run_agent --help' or './run_agent -h'."
+  exit 1
+fi
+
+# check port validity
+if [[ $AGENT_PORT -ge 1 && $AGENT_PORT -le 65526 ]]; then
+  # given port is valid
+  AGENT_PORT_RANGE=${AGENT_PORT}-$(expr ${AGENT_PORT} + 9)
+  echo -e "Running the agent in mode ${AGENT_MODE} with name : ${AGENT_NAME} and port : ${AGENT_PORT}.\n"
+else
+  # given port is not valid
+  echo "Port are not valid, please enter a number between 1-65526"
+  exit 1
+fi
+  
+
+# shift all checked arguments and add following augments into ARGS
+shift
+shift
+shift
+
+# TODO: test and add back all arguments for Options 
+ARGS=""
+# TRACE_ENABLED=""
+# TRACE_TAG=acapy.events
+# if ! [ -z "$TRACE_TARGET_URL" ]; then
+#   TRACE_TARGET=http://${TRACE_TARGET_URL}/
+# else
+#   TRACE_TARGET=log
+# fi
+# WEBHOOK_TARGET=""
+# if [ -z "$DOCKER_NET" ]; then
+#   DOCKER_NET="bridge"
+# fi
+# DOCKER_VOL=""
+
+# j=1
+# for i in "$@"; do
+#   ((j++))
+#   if [ ! -z "$SKIP" ]; then
+#     SKIP=""
+#     continue
+#   fi
+#   case $i in
+#   --events)
+#     if [ "${AGENT}" = "performance" ]; then
+#       echo -e "\nIgnoring the \"--events\" option when running the ${AGENT} agent.\n"
+#     else
+#       EVENTS=1
+#     fi
+#     continue
+#     ;;
+#   --self-attested)
+#     SELF_ATTESTED=1
+#     continue
+#     ;;
+#   --trace-log)
+#     TRACE_ENABLED=1
+#     TRACE_TARGET=log
+#     TRACE_TAG=acapy.events
+#     continue
+#     ;;
+#   --trace-http)
+#     TRACE_ENABLED=1
+#     TRACE_TARGET=http://${TRACE_TARGET_URL}/
+#     TRACE_TAG=acapy.events
+#     continue
+#     ;;
+#   --webhook-url)
+#     WEBHOOK_TARGET=http://${WEBHOOK_URL}
+#     continue
+#     ;;
+#   --debug-ptvsd)
+#     ENABLE_PTVSD=1
+#     continue
+#     ;;
+#   --debug-pycharm)
+#     ENABLE_PYDEVD_PYCHARM=1
+#     continue
+#     ;;
+#   --debug-pycharm-controller-port)
+#     PYDEVD_PYCHARM_CONTROLLER_PORT=${!j}
+#     SKIP=1
+#     continue
+#     ;;
+#   --debug-pycharm-agent-port)
+#     PYDEVD_PYCHARM_AGENT_PORT=${!j}
+#     SKIP=1
+#     continue
+#     ;;
+#   --timing)
+#     if [ ! -d "../logs" ]; then
+#       mkdir ../logs && chmod -R uga+rws ../logs
+#     fi
+#     if [ "$(ls -ld ../logs | grep dr..r..rwx)" == "" ]; then
+#       echo "Error: To use the --timing parameter, the directory '../logs' must exist and all users must be able to write to it."
+#       echo "For example, to create the directory and then set the permissions use: 'mkdir ../logs; chmod uga+rws ../logs'"
+#       exit 1
+#     fi
+
+#     DOCKER_VOL="${DOCKER_VOL} -v C:/Users/42143/Desktop/BA-Arbeit/report/bachelor-thesis-zhenghao-zhang/Code/Aries/aries-cloudagent-python/demo/logs/:/home/indy/logs"
+#     DOCKER_VOL="${DOCKER_VOL} -v /$(pwd)/../logs:/home/indy/logs"
+#     DOCKER_VOL="${DOCKER_VOL} -v ../logs : /home/indy/logs"
+#     continue
+#     ;;
+#   --bg)
+#     if [ "${AGENT}" = "server" ] || [ "${AGENT}" = "gui" ]; then
+#       DOCKER_OPTS="-d"
+#       echo -e "\nRunning in ${AGENT} in the background. Note that you cannot use the command line console in this mode."
+#       echo To see the logs use: \"docker logs ${AGENT}\".
+#       echo While viewing logs, hit CTRL-C to return to the command line.
+#       echo To stop the agent, use: \"docker stop ${AGENT}\". The docker environment will
+#       echo -e "be removed on stop.\n\n"
+#     else
+#       echo The "bg" option \(for running docker in detached mode\) is only for agents
+#       echo Ignoring...
+#     fi
+#     continue
+#     ;;
+#   esac
+#   ARGS="${ARGS:+$ARGS }$i"
+# done
+
+# build docker image
 echo "Preparing agent image..."
-docker build -q -t gui-demo -f ../docker/Dockerfile.demogui .. || exit 1
+docker build -q -t ${AGENT_NAME}_image -f ./docker/Dockerfile . || exit 1
 
 if [ ! -z "$DOCKERHOST" ]; then
   # provided via APPLICATION_URL environment variable
@@ -178,25 +206,27 @@ else
   export RUNMODE="pwd"
 fi
 
+# TODO: Test and support ngrox
 # check if ngrok is running on our $AGENT_PORT (don't override if AGENT_ENDPOINT is already set)
-if [ -z "$AGENT_ENDPOINT" ] && [ "$RUNMODE" == "docker" ]; then
-  echo "Trying to detect ngrok service endpoint"
-  JQ=${JQ:-$(which jq)}
-  if [ -x "$JQ" ]; then
-    NGROK_ENDPOINT=$(curl --silent localhost:4040/api/tunnels | $JQ -r '.tunnels[0].public_url')
-    if [ -z "$NGROK_ENDPOINT" ] || [ "$NGROK_ENDPOINT" = "null" ]; then
-      echo "ngrok not detected for agent endpoint"
-    else
-      export AGENT_ENDPOINT=$NGROK_ENDPOINT
-      echo "Detected ngrok agent endpoint [$AGENT_ENDPOINT]"
-    fi
-  else
-    echo "jq not found"
-  fi
-fi
+# if [ -z "$AGENT_ENDPOINT" ] && [ "$RUNMODE" == "docker" ]; then
+#   echo "Trying to detect ngrok service endpoint"
+#   JQ=${JQ:-$(which jq)}
+#   if [ -x "$JQ" ]; then
+#     NGROK_ENDPOINT=$(curl --silent localhost:4040/api/tunnels | $JQ -r '.tunnels[0].public_url')
+#     if [ -z "$NGROK_ENDPOINT" ] || [ "$NGROK_ENDPOINT" = "null" ]; then
+#       echo "ngrok not detected for agent endpoint"
+#     else
+#       export AGENT_ENDPOINT=$NGROK_ENDPOINT
+#       echo "Detected ngrok agent endpoint [$AGENT_ENDPOINT]"
+#     fi
+#   else
+#     echo "jq not found"
+#   fi
+# fi
 
 echo "DOCKERHOST=$DOCKERHOST"
 
+# check global parameters
 DOCKER_ENV="-e LOG_LEVEL=${LOG_LEVEL} -e RUNMODE=${RUNMODE} -e DOCKERHOST=${DOCKERHOST}"
 if ! [ -z "$AGENT_PORT" ]; then
   DOCKER_ENV="${DOCKER_ENV} -e AGENT_PORT=${AGENT_PORT}"
@@ -255,9 +285,9 @@ if [ "$OSTYPE" = "msys" ]; then
   DOCKER="winpty docker"
 fi
 
-if [ "$AGENT" = "gui" ]; then
+if [ "$AGENT_MODE" = "gui" ]; then
   DOCKER=${DOCKER:-docker}
-  cd ../../../GUI
+  cd ./GUI
   python pyqt5_gui.py ${AGENT_PORT} ${AGENT_NAME} &
 fi
 
@@ -266,4 +296,4 @@ $DOCKER run --name ${AGENT_NAME} --rm -it ${DOCKER_OPTS} \
   -p 0.0.0.0:$AGENT_PORT_RANGE:$AGENT_PORT_RANGE \
   ${DOCKER_VOL} \
   $DOCKER_ENV \
-  gui-demo $AGENT_MODULE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
+  ${AGENT_NAME}_image $AGENT_MODE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
