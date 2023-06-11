@@ -1,0 +1,18 @@
+{
+    "access_right_schema": {
+        "hmo5bWT6DTJ3n2WFiFGDU": [
+            {
+                "object": "granted_object",
+                "granted_object": "object"
+            },
+            {
+                "action": "granted_action",
+                "granted_action": "action"
+            },
+            {
+                "from": "issuer",
+                "issuer": "from"
+            }
+        ]
+    }
+}

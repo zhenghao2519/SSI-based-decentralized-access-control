@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EnterInvitation</class>
+ <widget class="QWidget" name="EnterInvitation">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>611</width>
+    <height>323</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QLabel" name="agent_name_label">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>20</y>
+     <width>141</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Berlin Sans FB</family>
+     <pointsize>13</pointsize>
+     <underline>true</underline>
+    </font>
+   </property>
+   <property name="text">
+    <string>Enter Invitation</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="textEdit">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>70</y>
+     <width>571</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="placeholderText">
+    <string>example:  {&quot;@type&quot;: &quot;https://didcomm.org/out-of-band/1.1/invitation&quot;, &quot;@id&quot;: &quot;3ba91fa5-f518-4fde-b047-0b0bf91807a5&quot;, &quot;services&quot;: [{&quot;id&quot;: &quot;#inline&quot;, &quot;type&quot;: &quot;did-communication&quot;, &quot;recipientKeys&quot;: [&quot;did:key:z6MkmbxoXHKYJdEnDYCs6yor3NUjr1gx7X9wqj6BhJ8pYzEj&quot;], &quot;serviceEndpoint&quot;: &quot;http://host.docker.internal:8040&quot;}], &quot;handshake_protocols&quot;:[&quot;https://didcomm.org/didexchange/1.0&quot;], &quot;label&quot;: &quot;forwarder.agent&quot;} </string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="startAgentButton_2">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>230</y>
+     <width>191</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Berlin Sans FB</family>
+     <pointsize>13</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Enter</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,18 @@
+{
+    "employee schema": {
+        "hmo5bWT6DTJ3n2WFiFGDU": [
+            {
+                "title_vc": "title",
+                "title": "title_vc"
+            },
+            {
+                "company_vc": "company",
+                "company": "company_vc"
+            },
+            {
+                "working_hours_vc": "working_hours_predicate",
+                "working_hours": "working_hours_vc"
+            }
+        ]
+    }
+}
