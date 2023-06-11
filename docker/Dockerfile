@@ -27,7 +27,9 @@ ADD README.md ./
 RUN pip3 install --no-cache-dir aries-cloudagent\
 	pip install --no-cache-dir OPA-python-client\
 	pip install --no-cache-dir requests\
-	pip install --no-cache-dir jsonsearch
+	pip install --no-cache-dir jsonsearch\
+	pip install --no-cache-dir pygments\
+	pip install --no-cache-dir asyncpg
 
 # RUN mkdir demo logs && chown -R indy:indy demo logs && chmod -R ug+rw demo logs
 

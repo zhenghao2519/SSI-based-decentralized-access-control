@@ -11,13 +11,13 @@ from uuid import uuid4
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # noqa
 
-from runners.agent_container import (  # noqa:E402
+from agent_runners.agent_container import (  # noqa:E402
     arg_parser,
     create_agent_with_args,
     AriesAgent,
     AgentContainer
 )
-from runners.support.utils import (  # noqa:E402
+from agent_runners.support.utils import (  # noqa:E402
     check_requires,
     log_msg,
     log_status,
@@ -25,7 +25,7 @@ from runners.support.utils import (  # noqa:E402
     prompt,
     prompt_loop,
 )
-from runners.support.agent import (  # noqa:E402
+from agent_runners.support.agent import (  # noqa:E402
     DemoAgent,
     default_genesis_txns,
     start_mediator_agent,

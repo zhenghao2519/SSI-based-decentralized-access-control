@@ -9,6 +9,8 @@ import socket
 import subprocess
 import sys
 import time
+
+
 from uuid import uuid4
 
 from opa_client.opa import OpaClient
@@ -22,16 +24,16 @@ from aries_cloudagent.indy.sdk.wallet_setup import (  # noqa:E402
     IndyWalletConfig
 )
 
-from runners.support.utils import (  # noqa:E402
+from agent_runners.support.utils import (  # noqa:E402
     log_msg,
     log_status,
     log_timer,
 )
-from runners.agent_container import (  # noqa:E402
+from agent_runners.agent_container import (  # noqa:E402
     arg_parser,
     AgentContainer
 )
-from runners.gui_controller import (  # noqa:E402
+from agent_runners.gui_controller import (  # noqa:E402
     create_agent
 )
 from aiohttp import (
@@ -79,7 +81,7 @@ async def tcplink(sock, addr, agent_name):
                 ledger_url = ledger_url[0:-8]
                 seed = re.match(r'.*--seed\s(.*?)\s', args, re.DOTALL).group(1)
                 provision_resp += await provision_register_did(ledger_url=ledger_url, alias=agent_name, seed=seed)
-            provision_resp += "\n" + subprocess.getoutput('aca-py provision ' + args)
+            provision_resp += "\n" + subprocess.getoutput('python -m aries_cloudagent provision ' + args)
             log_msg(agent_name + " provision: " + provision_resp)
             if ("Created new profile" in provision_resp):
                 provision_resp = "Successfully created wallet with following response!\n\n" + provision_resp
