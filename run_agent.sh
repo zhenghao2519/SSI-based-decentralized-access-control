@@ -11,7 +11,7 @@ if ! [ -z "$1" ]; then
   AGENT_MODE="$1"
 else
   echo "Please enter all required arguments correctly!"
-  echo "For more details, run './run_agent --help' or './run_agent -h'."
+  echo "For more details, run './run_agent.sh --help' or './run_agent.sh -h'."
   exit 1
 fi
 
@@ -20,7 +20,7 @@ if [ "$AGENT_MODE" = "--help" ] || [ "$AGENT_MODE" = "-h" ]; then
   cat <<EOF
 
 Usage:
-   ./run_agent <mode> <port> <name> [OPTIONS]
+   ./run_agent.sh <mode> <port> <name> [OPTIONS]
 
    - <mode> is 'server' or 'gui'. The option 'gui' starts a GUI along with the 
             agent. While the option 'server' only starts the agent itself.
@@ -46,7 +46,7 @@ fi
 #check mode validity
 if ! [[ "$AGENT_MODE" = "gui" || "$AGENT_MODE" = "server" ]]; then
   echo "Please specify which agent you want to run. Choose from 'server', 'gui'."
-  echo "For more details, run './run_agent --help' or './run_agent -h'."
+  echo "For more details, run './run_agent.sh --help' or './run_agent.sh -h'."
   exit 1
 fi
 
@@ -57,7 +57,7 @@ if ! [[ -z "$2" || -z "$3" ]]; then
   AGENT_NAME="$3"
 else 
   echo "please enter the agent port and agent name."
-  echo "For more details, run './run_agent --help' or './run_agent -h'."
+  echo "For more details, run './run_agent.sh --help' or './run_agent.sh -h'."
   exit 1
 fi
 
@@ -80,18 +80,18 @@ shift
 
 # TODO: test and add back all arguments for Options 
 ARGS=""
-# TRACE_ENABLED=""
-# TRACE_TAG=acapy.events
-# if ! [ -z "$TRACE_TARGET_URL" ]; then
-#   TRACE_TARGET=http://${TRACE_TARGET_URL}/
-# else
-#   TRACE_TARGET=log
-# fi
-# WEBHOOK_TARGET=""
-# if [ -z "$DOCKER_NET" ]; then
-#   DOCKER_NET="bridge"
-# fi
-# DOCKER_VOL=""
+TRACE_ENABLED=""
+TRACE_TAG=acapy.events
+if ! [ -z "$TRACE_TARGET_URL" ]; then
+  TRACE_TARGET=http://${TRACE_TARGET_URL}/
+else
+  TRACE_TARGET=log
+fi
+WEBHOOK_TARGET=""
+if [ -z "$DOCKER_NET" ]; then
+  DOCKER_NET="bridge"
+fi
+DOCKER_VOL=""
 
 # j=1
 # for i in "$@"; do
@@ -182,7 +182,7 @@ ARGS=""
 
 # build docker image
 echo "Preparing agent image..."
-docker build -q -t ${AGENT_NAME}_image -f ./docker/Dockerfile .. || exit 1
+docker build -q -t agent_image -f ./docker/Dockerfile . || exit 1
 
 if [ ! -z "$DOCKERHOST" ]; then
   # provided via APPLICATION_URL environment variable
@@ -285,15 +285,18 @@ if [ "$OSTYPE" = "msys" ]; then
   DOCKER="winpty docker"
 fi
 
+
 if [ "$AGENT_MODE" = "gui" ]; then
+  echo "starting gui"
   DOCKER=${DOCKER:-docker}
   cd ./GUI
   python pyqt5_gui.py ${AGENT_PORT} ${AGENT_NAME} &
 fi
 
+echo "starting server" &
 $DOCKER run --name ${AGENT_NAME} --rm -it ${DOCKER_OPTS} \
   --network=${DOCKER_NET} \
   -p 0.0.0.0:$AGENT_PORT_RANGE:$AGENT_PORT_RANGE \
   ${DOCKER_VOL} \
   $DOCKER_ENV \
-  ${AGENT_NAME}_image $AGENT_MODE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
+  agent_image $AGENT_MODE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
