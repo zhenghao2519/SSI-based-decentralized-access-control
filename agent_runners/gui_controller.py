@@ -52,18 +52,6 @@ from jsonsearch import JsonSearch
 import sys
 import time
 
-# Here is an example Transformation function
-transformation = {
-    "employee schema": {
-        "9ayP8HFT9pefJZZ54tfmoh": [
-            {
-                "title": "role",
-                "role": "title"
-            }
-        ]
-    }
-}
-
 service_request_storage = []
 agent = None
 
@@ -919,7 +907,7 @@ async def create_agent(json):
         )
         # log_status("Problems here")
         agent = GuiAgent(
-            "gui.agent",
+            json["ident"] if "ident" in json else "gui.agent",
             gui_agent.start_port,
             gui_agent.start_port + 1,
             # external_host = json["external_host"] if "external_host" in json else None,
