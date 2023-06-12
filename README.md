@@ -1,18 +1,24 @@
-# Bachelor Thesis Zhenghao Zhang
+# SSI-Based Decentralized Access Control
+
+A decentralized access control system supports all kinds of access control models (e.g., ABAC, RBAC, CapBAC) by leveraging Self-sovereign Identity.
 
 ## Overview
 
-This directory contains a decentralized identity-based agent representing things in Forestry. The agent acts as a TCP server and receives commands in JSON form.
+SSI stands for Self-sovereign Identity.
 
-An extra GUI based on pyqt5 is also provided, acting as a client sending commands.
+This directory contains four parts of code, which form an agent representing things in Forestry 4.0. 
 
+1.  `agent_runners`: The agent itself acts as a TCP server and receives commands in JSON form.
 
+2.  `gui`: A pyqt5 GUI is also provided, acting as a client sending commands.
+3.  `docker`: dockerfile for building an image, which contains the agent.
+4.  `opa`: some example implementation Rego policy used by OPA 
 
 The overall architecture is shown as follows:
 
 ![implementation.drawio](implementation_arch.png)
 
-In order to let the agent work properly, a distributed ledger and an external access control engine is required.
+In order to let the agent work properly, a distributed ledger and an external access control engine are required.
 
 
 
@@ -24,59 +30,50 @@ Access Control Engine: [open-policy-agent/opa: An open source, general-purpose p
 
 
 
-However, the system does not depend on certain choices of them. You can use any implementation with the same functionality to replace any of them.
+However, the system does not depend on certain choices of them. You can use any implementation with the same functionality to replace any of them. (might requires rewriting part of the code)
 
 
 
-Before starting an agent, please copy all files from [hyperledger/aries-cloudagent-python: Hyperledger Aries Cloud Agent Python (ACA-Py)(github.com)](https://github.com/hyperledger/aries-cloudagent-python)  under the path `Code/Aries/aries-cloudagent-python`. (recommended)
+## Start Agent
 
-Optionally, you can also use the Python package ` aries-cloudagent `. In this case, some minor changes have to be done in the docker files.
-
-
-
-Note: An docker image will be published on docker hub soon.
-
-
-
-## OPA
-
-First, you can find a YAML file called  `docker-compose.yml` under `Code/OPA`. By using the command `docker-compose up`, you can simply start OPA running as a docker. 
-
-You can also find some policy files in the same directory, these will be automatically used by the agent if you choose the corresponding option while starting the agent.
-
-
-
-## Agent
-
-To start the agent, please run the shell file under the path `\Code\Aries\aries-cloudagent-python\demo`.
-
-An example to start an Agent with GUI will be like:
-
-` ./run_demo gui 8000 moisture_sensor001   `
-
-​	`gui` means a GUI will also be started.
-
-​	`8000` is the port used by the agent.
-
-​	`moisture_sensor001 ` is the name of the agent.
-
-
+To start the agent, please run  `./run_agent.sh <mode> <port> <name> [OPTIONS]`
 
 You can use `` ./run_demo gui --help` for further information.
 
-After stating the agent, a GUI window will pop up with two options: Provision and Start
+There are two agent mode:
+
+- `server`: only run the agent docker.
+- `gui`: also call up a GUI client while starting the agent docker.
+
+
+
+## Commands
 
 #### Provision 
 
-Create a new wallet that can be used in later start phase.
+Create a new wallet that can be used in the later start phase.
 
 #### Start
 
 Start a new agent. If no provisioned wallet is given, a random wallet will be created.
 
-Once the operation menu pops up, you can control the agent following the given instructions.
+Once the operation menu pops up, you can control the agent by following the given instructions.
 
+#### Generate Invitation
 
+#### Enter Invitation
+
+#### Check Credential
+
+#### Send Message
+
+#### Publish Schema
+
+#### Issue Credential
+
+#### Fetch Schema
+
+#### Send Service Request
 
 
 
