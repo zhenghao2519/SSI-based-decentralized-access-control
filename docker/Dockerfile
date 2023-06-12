@@ -24,7 +24,7 @@ ADD README.md ./
 # USER 1000
 
 
-RUN pip3 install --no-cache-dir aries-cloudagent\
+RUN pip3 install --no-cache-dir aries-cloudagent==0.7.5\
 	pip install --no-cache-dir OPA-python-client\
 	pip install --no-cache-dir requests\
 	pip install --no-cache-dir jsonsearch\
