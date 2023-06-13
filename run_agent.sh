@@ -20,13 +20,19 @@ if [ "$AGENT_MODE" = "--help" ] || [ "$AGENT_MODE" = "-h" ]; then
   cat <<EOF
 
 Usage:
-   ./run_agent.sh <mode> <port> <name> [OPTIONS]
+   ./run_agent.sh <mode> <port> <name> <endpoint> [OPTIONS]
 
-   - <mode> is 'server' or 'gui'. The option 'gui' starts a GUI along with the 
-            agent. While the option 'server' only starts the agent itself.
-   - <port> is the port that the agent uses. The agent reserves 9 ports after 
-            the given port. (e.g., 8000 => 8000-8009)
-   - <name> is the name of the agent.
+   - <mode>     is 'server' or 'gui'. The option 'gui' starts a GUI along with the 
+                agent. While the option 'server' only starts the agent itself.
+   - <port>     is the port that the agent uses. The agent reserves 9 ports after 
+                the given port. (e.g., 8000 => 8000-8009)
+   - <name>     is the name of the agent.
+   - <endpoint> specifies the endpoint where other agents should send messages to.
+                Default value is http://docker.host.internal:{port} (only works 
+                for two dockers on the same host)
+                This argument is optional if you are runnning two dockers on the 
+                same device or running ngrok service on the given port
+
 EOF
 #    - Options:
 #       --events - display on the terminal the webhook events from the ACA-Py agent.
@@ -71,12 +77,18 @@ else
   echo "Port are not valid, please enter a number between 1-65526"
   exit 1
 fi
-  
+
+#check whether an endpoint is given
+if ! [ -z "$4" ]; then
+  AGENT_ENDPOINT="$4"
+  shift
+fi
 
 # shift all checked arguments and add following augments into ARGS
 shift
 shift
 shift
+
 
 # TODO: test and add back all arguments for Options 
 ARGS=""
@@ -242,6 +254,7 @@ if ! [ -z "$GENESIS_URL" ]; then
   DOCKER_ENV="${DOCKER_ENV} -e GENESIS_URL=${GENESIS_URL}"
 fi
 if ! [ -z "$AGENT_ENDPOINT" ]; then
+  echo "call"
   DOCKER_ENV="${DOCKER_ENV} -e AGENT_ENDPOINT=${AGENT_ENDPOINT}"
 fi
 if ! [ -z "$EVENTS" ]; then
@@ -289,11 +302,10 @@ fi
 if [ "$AGENT_MODE" = "gui" ]; then
   echo "starting gui"
   DOCKER=${DOCKER:-docker}
-  cd ./GUI
+  cd ./gui
   python pyqt5_gui.py ${AGENT_PORT} ${AGENT_NAME} &
 fi
 
-echo "starting server" &
 $DOCKER run --name ${AGENT_NAME} --rm -it ${DOCKER_OPTS} \
   --network=${DOCKER_NET} \
   -p 0.0.0.0:$AGENT_PORT_RANGE:$AGENT_PORT_RANGE \
