@@ -36,7 +36,7 @@ However, the system does not depend on certain choices of them. You can use any 
 
 ## Start Agent
 
-To start the agent, please run  `./run_agent.sh <mode> <port> <name> [OPTIONS]`
+To start the agent, please run  `./run_agent.sh <mode> <port> <name> <endpoint> [OPTIONS]`
 
 You can use `` ./run_demo gui --help` for further information.
 
