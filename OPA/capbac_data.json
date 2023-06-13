@@ -1,0 +1,12 @@
+{
+    "grants": {
+        "temperature": {
+            "read" : ["hmo5bWT6DTJ3n2WFiFGDU", "tto5bWT6DTJ3n2WFiFGDU"],
+            "write" : ["hmo5bWT6DTJ3n2WFiFGDU", "tto5bWT6DTJ3n2WFiFGDU"]
+        },
+        "moisture": {
+            "read" : ["hmo5bWT6DTJ3n2WFiFGDU"]
+        }
+    }
+}
+
