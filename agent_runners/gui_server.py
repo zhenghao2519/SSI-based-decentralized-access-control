@@ -9,6 +9,8 @@ import socket
 import subprocess
 import sys
 import time
+
+
 from uuid import uuid4
 
 from opa_client.opa import OpaClient
@@ -22,16 +24,16 @@ from aries_cloudagent.indy.sdk.wallet_setup import (  # noqa:E402
     IndyWalletConfig
 )
 
-from runners.support.utils import (  # noqa:E402
+from agent_runners.support.utils import (  # noqa:E402
     log_msg,
     log_status,
     log_timer,
 )
-from runners.agent_container import (  # noqa:E402
+from agent_runners.agent_container import (  # noqa:E402
     arg_parser,
     AgentContainer
 )
-from runners.gui_controller import (  # noqa:E402
+from agent_runners.gui_controller import (  # noqa:E402
     create_agent
 )
 from aiohttp import (
@@ -60,6 +62,7 @@ async def tcplink(sock, addr, agent_name):
         if not msg_json_dumped:
             continue
         if msg_json_dumped == 'exit':
+            log_status('Connection from %s : %s closed.' % addr)
             break
 
         try:
@@ -79,7 +82,7 @@ async def tcplink(sock, addr, agent_name):
                 ledger_url = ledger_url[0:-8]
                 seed = re.match(r'.*--seed\s(.*?)\s', args, re.DOTALL).group(1)
                 provision_resp += await provision_register_did(ledger_url=ledger_url, alias=agent_name, seed=seed)
-            provision_resp += "\n" + subprocess.getoutput('aca-py provision ' + args)
+            provision_resp += "\n" + subprocess.getoutput('python -m aries_cloudagent provision ' + args)
             log_msg(agent_name + " provision: " + provision_resp)
             if ("Created new profile" in provision_resp):
                 provision_resp = "Successfully created wallet with following response!\n\n" + provision_resp
@@ -391,8 +394,6 @@ async def tcplink(sock, addr, agent_name):
                 await server_send_msg(sock,
                                       "Successfully send service request:\n\n" + json.dumps(resp_send_message))
 
-    # sock.close()
-    log_status('Connection from %s : %s closed.' % addr)
 
 
 async def server_send_no_connection_error(sock):
@@ -513,9 +514,9 @@ def configureOPA(opa_address, opa_port, opa_rego, opa_data, acm):
 #         await server.serve_forever()
 
 async def main(args):
-    start_port = args.port
-    agent_name = args.ident
-    log_msg("port: " + str(start_port))
+    start_port = args.port if args.port else 8020
+    agent_name = args.ident if args.ident else "random_name"
+    log_msg(agent_name + " with server port: " + str(start_port + 3))
     # start_port is the endpoint, start_port+1 is admin, start_port+2 is webhook,start_port+3 is the server for gui
     s.bind(("0.0.0.0", start_port + 3))
     # The size of the waiting list for gui client.

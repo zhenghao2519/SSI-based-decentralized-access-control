@@ -1,0 +1,82 @@
+{
+    "environment_attributes": {
+        "date": 20230301,
+        "time": 1830
+    },
+    "object_attributes": {
+        "passiblity": {
+            "open_service": true
+        }
+    },
+    "policies":[
+        {
+            "object": "passiblity",
+            "action": "read",
+            "rules": [
+                {
+                    "equal":{
+                        "subject":[
+                            {
+                                "key": "title",
+                                "value": ["forest worker", "harvester"]
+                            },
+                            {
+                                "key": "company",
+                                "value": ["baysf", "fez"]
+                            }
+                        ],
+                        "object":[
+                            {
+                                "key": "open_service",
+                                "value": [true]
+                            }
+                        ],
+                        "environment":[]
+                    },
+                    "predicates":{
+                        "subject":[
+                            {
+                                "key": "working_hours",
+                                "type": "<=",
+                                "higher_than": 0,
+                                "lower_than": 3000,
+                                "optional_vp_predicates":{
+                                    "key":"working_hours_predicate",
+                                    "value":true
+                                }
+                            }
+                        ],
+                        "object":[],
+                        "environment":[
+                            {
+                                "key": "time",
+                                "higher_than": 1200,
+                                "lower_than": 2130
+                            }
+                        ]
+                    }
+                },
+                {
+                    "equal":{
+                        "subject":[
+                            {
+                                "key": "title",
+                                "value": ["owner"]
+                            }
+                        ],
+                        "object":[],
+                        "environment":[]
+                    },
+                    "predicates":{
+                        "subject":[],
+                        "object":[],
+                        "environment":[]
+                    }
+                }
+            ]
+        }
+    ] 
+}
+
+
+

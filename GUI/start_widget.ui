@@ -144,10 +144,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>http://192.168.0.5:9000/genesis</string>
+    <string>http://192.168.178.119:9000/genesis</string>
    </property>
    <property name="placeholderText">
-    <string>example: http://host.docker.internal:9000/genesis</string>
+    <string>example: http://xxxxx:9000/genesis</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_20">
@@ -431,10 +431,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>http://192.168.0.5:8181</string>
+    <string>http://192.168.178.119:8181</string>
    </property>
    <property name="placeholderText">
-    <string>example: http://host.docker.internal:8181</string>
+    <string>example: http://xxxxxx:8181</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="seed">

@@ -1,0 +1,43 @@
+{
+    "role_grants": [
+        {
+            "name" : "forest worker",
+            "grants" : [
+                {
+                    "action": "execute",
+                    "object": "forward"
+                },
+                {
+                    "action": "read",
+                    "object": "speed"
+                }
+            ]
+        },
+        {
+            "name" : "manager",
+            "grants" : [
+                {
+                    "action": "read",
+                    "object": "location"
+                },
+                {
+                    "action": "read",
+                    "object": "speed"
+                }
+            ]
+        },
+        {
+            "name" : "repairer",
+            "grants" : [
+                {
+                    "action": "update",
+                    "object": "abrasion"
+                },
+                {
+                    "action": "read",
+                    "object": "working_hours"
+                }
+            ]
+        }
+    ]
+}
