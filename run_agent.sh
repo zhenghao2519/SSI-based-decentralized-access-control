@@ -20,21 +20,21 @@ if [ "$AGENT_MODE" = "--help" ] || [ "$AGENT_MODE" = "-h" ]; then
   cat <<EOF
 
 Usage:
-   ./run_agent.sh <mode> <port> <name> <endpoint> [OPTIONS]
+   ./run_agent.sh <mode> <port> <name> [OPTIONS]
 
-   - <mode>     is 'server' or 'gui'. The option 'gui' starts a GUI along with the 
-                agent. While the option 'server' only starts the agent itself.
-   - <port>     is the port that the agent uses. The agent reserves 9 ports after 
-                the given port. (e.g., 8000 => 8000-8009)
+   - <mode>     is 'server' or 'gui'.
+                The option 'gui' starts a GUI along with the agent. 
+                While the option 'server' only starts the agent itself.
+   - <port>     is the port that the agent uses. 
+                The agent reserves 9 ports after the given port. 
+                (e.g., 8000 => 8000-8009)
    - <name>     is the name of the agent.
-   - <endpoint> specifies the endpoint where other agents should send messages to.
-                Default value is http://docker.host.internal:{port} (only works 
-                for two dockers on the same host)
-                This argument is optional if you are runnning two dockers on the 
-                same device or running ngrok service on the given port
 
+    - Options:
+        --set-endpoint <endpoint> - specifies the endpoint which other agents should communicate.
+                                    Default value is http://docker.host.internal:{port} (only works 
+                                    for two dockers on the same host)
 EOF
-#    - Options:
 #       --events - display on the terminal the webhook events from the ACA-Py agent.
 #       --timing - at the end of the run, display timing; relevant to the "performance" agent.
 #       --bg - run the agent in the background; for use when using OpenAPI/Swagger interface
@@ -78,11 +78,11 @@ else
   exit 1
 fi
 
-#check whether an endpoint is given
-if ! [ -z "$4" ]; then
-  AGENT_ENDPOINT="$4"
-  shift
-fi
+# #check whether an endpoint is given
+# if ! [ -z "$4" ]; then
+#   AGENT_ENDPOINT="$4"
+#   shift
+# fi
 
 # shift all checked arguments and add following augments into ARGS
 shift
@@ -105,92 +105,98 @@ if [ -z "$DOCKER_NET" ]; then
 fi
 DOCKER_VOL=""
 
-# j=1
-# for i in "$@"; do
-#   ((j++))
-#   if [ ! -z "$SKIP" ]; then
-#     SKIP=""
-#     continue
-#   fi
-#   case $i in
-#   --events)
-#     if [ "${AGENT}" = "performance" ]; then
-#       echo -e "\nIgnoring the \"--events\" option when running the ${AGENT} agent.\n"
-#     else
-#       EVENTS=1
-#     fi
-#     continue
-#     ;;
-#   --self-attested)
-#     SELF_ATTESTED=1
-#     continue
-#     ;;
-#   --trace-log)
-#     TRACE_ENABLED=1
-#     TRACE_TARGET=log
-#     TRACE_TAG=acapy.events
-#     continue
-#     ;;
-#   --trace-http)
-#     TRACE_ENABLED=1
-#     TRACE_TARGET=http://${TRACE_TARGET_URL}/
-#     TRACE_TAG=acapy.events
-#     continue
-#     ;;
-#   --webhook-url)
-#     WEBHOOK_TARGET=http://${WEBHOOK_URL}
-#     continue
-#     ;;
-#   --debug-ptvsd)
-#     ENABLE_PTVSD=1
-#     continue
-#     ;;
-#   --debug-pycharm)
-#     ENABLE_PYDEVD_PYCHARM=1
-#     continue
-#     ;;
-#   --debug-pycharm-controller-port)
-#     PYDEVD_PYCHARM_CONTROLLER_PORT=${!j}
-#     SKIP=1
-#     continue
-#     ;;
-#   --debug-pycharm-agent-port)
-#     PYDEVD_PYCHARM_AGENT_PORT=${!j}
-#     SKIP=1
-#     continue
-#     ;;
-#   --timing)
-#     if [ ! -d "../logs" ]; then
-#       mkdir ../logs && chmod -R uga+rws ../logs
-#     fi
-#     if [ "$(ls -ld ../logs | grep dr..r..rwx)" == "" ]; then
-#       echo "Error: To use the --timing parameter, the directory '../logs' must exist and all users must be able to write to it."
-#       echo "For example, to create the directory and then set the permissions use: 'mkdir ../logs; chmod uga+rws ../logs'"
-#       exit 1
-#     fi
+j=1
+for i in "$@"; do
+  ((j++))
+  if [ ! -z "$SKIP" ]; then
+    SKIP=""
+    continue
+  fi
+  case $i in
+  --set-endpoint)
+    AGENT_ENDPOINT=${!j}
+    SKIP=1
+    #echo "${AGENT_ENDPOINT}"
+    continue
+    ;;
+  # --events)
+  #   if [ "${AGENT}" = "performance" ]; then
+  #     echo -e "\nIgnoring the \"--events\" option when running the ${AGENT} agent.\n"
+  #   else
+  #     EVENTS=1
+  #   fi
+  #   continue
+  #   ;;
+  # --self-attested)
+  #   SELF_ATTESTED=1
+  #   continue
+  #   ;;
+  # --trace-log)
+  #   TRACE_ENABLED=1
+  #   TRACE_TARGET=log
+  #   TRACE_TAG=acapy.events
+  #   continue
+  #   ;;
+  # --trace-http)
+  #   TRACE_ENABLED=1
+  #   TRACE_TARGET=http://${TRACE_TARGET_URL}/
+  #   TRACE_TAG=acapy.events
+  #   continue
+  #   ;;
+  # --webhook-url)
+  #   WEBHOOK_TARGET=http://${WEBHOOK_URL}
+  #   continue
+  #   ;;
+  # --debug-ptvsd)
+  #   ENABLE_PTVSD=1
+  #   continue
+  #   ;;
+  # --debug-pycharm)
+  #   ENABLE_PYDEVD_PYCHARM=1
+  #   continue
+  #   ;;
+  # --debug-pycharm-controller-port)
+  #   PYDEVD_PYCHARM_CONTROLLER_PORT=${!j}
+  #   SKIP=1
+  #   continue
+  #   ;;
+  # --debug-pycharm-agent-port)
+  #   PYDEVD_PYCHARM_AGENT_PORT=${!j}
+  #   SKIP=1
+  #   continue
+  #   ;;
+  # --timing)
+  #   if [ ! -d "../logs" ]; then
+  #     mkdir ../logs && chmod -R uga+rws ../logs
+  #   fi
+  #   if [ "$(ls -ld ../logs | grep dr..r..rwx)" == "" ]; then
+  #     echo "Error: To use the --timing parameter, the directory '../logs' must exist and all users must be able to write to it."
+  #     echo "For example, to create the directory and then set the permissions use: 'mkdir ../logs; chmod uga+rws ../logs'"
+  #     exit 1
+  #   fi
 
-#     DOCKER_VOL="${DOCKER_VOL} -v C:/Users/42143/Desktop/BA-Arbeit/report/bachelor-thesis-zhenghao-zhang/Code/Aries/aries-cloudagent-python/demo/logs/:/home/indy/logs"
-#     DOCKER_VOL="${DOCKER_VOL} -v /$(pwd)/../logs:/home/indy/logs"
-#     DOCKER_VOL="${DOCKER_VOL} -v ../logs : /home/indy/logs"
-#     continue
-#     ;;
-#   --bg)
-#     if [ "${AGENT}" = "server" ] || [ "${AGENT}" = "gui" ]; then
-#       DOCKER_OPTS="-d"
-#       echo -e "\nRunning in ${AGENT} in the background. Note that you cannot use the command line console in this mode."
-#       echo To see the logs use: \"docker logs ${AGENT}\".
-#       echo While viewing logs, hit CTRL-C to return to the command line.
-#       echo To stop the agent, use: \"docker stop ${AGENT}\". The docker environment will
-#       echo -e "be removed on stop.\n\n"
-#     else
-#       echo The "bg" option \(for running docker in detached mode\) is only for agents
-#       echo Ignoring...
-#     fi
-#     continue
-#     ;;
-#   esac
-#   ARGS="${ARGS:+$ARGS }$i"
-# done
+  #   DOCKER_VOL="${DOCKER_VOL} -v C:/Users/42143/Desktop/BA-Arbeit/report/bachelor-thesis-zhenghao-zhang/Code/Aries/aries-cloudagent-python/demo/logs/:/home/indy/logs"
+  #   DOCKER_VOL="${DOCKER_VOL} -v /$(pwd)/../logs:/home/indy/logs"
+  #   DOCKER_VOL="${DOCKER_VOL} -v ../logs : /home/indy/logs"
+  #   continue
+  #   ;;
+  # --bg)
+  #   if [ "${AGENT}" = "server" ] || [ "${AGENT}" = "gui" ]; then
+  #     DOCKER_OPTS="-d"
+  #     echo -e "\nRunning in ${AGENT} in the background. Note that you cannot use the command line console in this mode."
+  #     echo To see the logs use: \"docker logs ${AGENT}\".
+  #     echo While viewing logs, hit CTRL-C to return to the command line.
+  #     echo To stop the agent, use: \"docker stop ${AGENT}\". The docker environment will
+  #     echo -e "be removed on stop.\n\n"
+  #   else
+  #     echo The "bg" option \(for running docker in detached mode\) is only for agents
+  #     echo Ignoring...
+  #   fi
+  #   continue
+  #   ;;
+  esac
+  ARGS="${ARGS:+$ARGS }$i"
+done
 
 # build docker image
 echo "Preparing agent image..."
@@ -218,7 +224,7 @@ else
   export RUNMODE="pwd"
 fi
 
-# TODO: Test and support ngrox
+# TODO: Test and support revocation
 # check if ngrok is running on our $AGENT_PORT (don't override if AGENT_ENDPOINT is already set)
 # if [ -z "$AGENT_ENDPOINT" ] && [ "$RUNMODE" == "docker" ]; then
 #   echo "Trying to detect ngrok service endpoint"
@@ -292,6 +298,7 @@ if ! [ -z "${ENABLE_PYDEVD_PYCHARM}" ]; then
 fi
 
 echo "DOCKER_ENV=$DOCKER_ENV"
+echo "ARGS=$ARGS"
 
 # on Windows, docker run needs to be prefixed by winpty
 if [ "$OSTYPE" = "msys" ]; then
