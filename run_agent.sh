@@ -312,6 +312,8 @@ fi
 
 
 if [ "$AGENT_MODE" = "gui" ]; then
+  echo "installing gui requirements"
+  pip install -r ./requirements_gui.txt
   echo "starting gui"
   DOCKER=${DOCKER:-docker}
   cd ./gui
@@ -324,3 +326,4 @@ $DOCKER run --name ${AGENT_NAME} --rm -it ${DOCKER_OPTS} \
   ${DOCKER_VOL} \
   $DOCKER_ENV \
   $DOCKER_IMAGE_NAME $AGENT_MODE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
+
