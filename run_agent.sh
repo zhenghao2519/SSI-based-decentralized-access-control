@@ -200,7 +200,12 @@ done
 
 # build docker image
 echo "Preparing agent image..."
-docker build -q -t agent_image -f ./docker/Dockerfile . || exit 1
+DOCKER_IMAGE_NAME="agent_image"
+if docker inspect --type=image "${DOCKER_IMAGE_NAME}" > /dev/null 2>&1; then
+  echo "Docker image ${DOCKER_IMAGE_NAME} already exists."
+else
+  docker build -q -t $DOCKER_IMAGE_NAME -f ./docker/Dockerfile . || exit 1
+fi
 
 if [ ! -z "$DOCKERHOST" ]; then
   # provided via APPLICATION_URL environment variable
@@ -307,6 +312,8 @@ fi
 
 
 if [ "$AGENT_MODE" = "gui" ]; then
+  echo "installing gui requirements"
+  pip install -r ./requirements_gui.txt
   echo "starting gui"
   DOCKER=${DOCKER:-docker}
   cd ./gui
@@ -318,4 +325,5 @@ $DOCKER run --name ${AGENT_NAME} --rm -it ${DOCKER_OPTS} \
   -p 0.0.0.0:$AGENT_PORT_RANGE:$AGENT_PORT_RANGE \
   ${DOCKER_VOL} \
   $DOCKER_ENV \
-  agent_image $AGENT_MODE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
+  $DOCKER_IMAGE_NAME $AGENT_MODE --ident $AGENT_NAME --port $AGENT_PORT $ARGS
+
