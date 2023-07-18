@@ -205,6 +205,7 @@ if docker inspect --type=image "${DOCKER_IMAGE_NAME}" > /dev/null 2>&1; then
   echo "Docker image ${DOCKER_IMAGE_NAME} already exists."
 else
   docker build -q -t $DOCKER_IMAGE_NAME -f ./docker/Dockerfile . || exit 1
+fi
 
 if [ ! -z "$DOCKERHOST" ]; then
   # provided via APPLICATION_URL environment variable
